@@ -1,26 +1,4 @@
-const getApiUrl = () => {
-    // 1. Explicitly set VITE_API_URL (Production)
-    if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
-
-    const hostname = window.location.hostname;
-
-    // 2. Local development fallback
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return 'http://localhost:5000';
-    }
-
-    // 3. Current origin (Likely misconfigured production)
-    if (hostname.includes('vercel.app') || hostname.includes('netlify.app')) {
-        console.error('[CONFIG] CRITICAL: VITE_API_URL is not set. API calls will fail.');
-    }
-
-    return window.location.origin;
-};
-
-export const API_BASE_URL = getApiUrl();
-
-// Note: This project is now frontend-only. Server API endpoints were removed.
-// Keep API_BASE_URL only for legacy fallbacks if needed.
+// Project is frontend-only. Backend API was removed; use Firestore client SDK and Cloudinary.
 
 export const getImageUrl = (path, options = {}) => {
     if (!path) return '';
@@ -41,7 +19,8 @@ export const getImageUrl = (path, options = {}) => {
     }
 
     if (path.startsWith('http')) return path; // Already absolute
-    if (path.startsWith('/uploads')) return `${API_BASE_URL}${path}`; // Local upload (legacy)
+    // If a local `/uploads` path appears, treat it as absolute (no server present)
+    if (path.startsWith('/uploads')) return path;
     return path;
 };
 
