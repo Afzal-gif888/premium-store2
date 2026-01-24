@@ -18,12 +18,9 @@ const getApiUrl = () => {
 };
 
 export const API_BASE_URL = getApiUrl();
-export const API_ENDPOINTS = {
-    PRODUCTS: `${API_BASE_URL}/api/products`,
-    ANNOUNCEMENTS: `${API_BASE_URL}/api/announcements`,
-    UPLOAD: `${API_BASE_URL}/api/upload`,
-    PAYMENTS: `${API_BASE_URL}/api/payments`,
-};
+
+// Note: This project is now frontend-only. Server API endpoints were removed.
+// Keep API_BASE_URL only for legacy fallbacks if needed.
 
 export const getImageUrl = (path, options = {}) => {
     if (!path) return '';
@@ -44,6 +41,12 @@ export const getImageUrl = (path, options = {}) => {
     }
 
     if (path.startsWith('http')) return path; // Already absolute
-    if (path.startsWith('/uploads')) return `${API_BASE_URL}${path}`; // Local upload
+    if (path.startsWith('/uploads')) return `${API_BASE_URL}${path}`; // Local upload (legacy)
     return path;
+};
+
+export const getCloudinaryUploadUrl = () => {
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    if (!cloudName) return '';
+    return `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
 };

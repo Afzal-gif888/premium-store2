@@ -1,9 +1,37 @@
 rules_version = '2';
+
+// Firestore security rules for Premium Store
+// - Admin-only write rules: only a user with custom claim `admin == true` can create/update/delete
+// - Public reads allowed for products and announcements
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /products/{id} {
+
+    // Products collection: public read, admin-only writes
+    match /products/{productId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Announcements: public read, admin-only writes
+    match /announcements/{annId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Payments: admin-only read/write
+    match /payments/{paymentId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Deny everything else
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
+}
+
+// Helper: admin check via custom claim `admin: true` on the user's ID token
+function isAdmin() {
+  return request.auth != null && request.auth.token.admin == true;
 }
