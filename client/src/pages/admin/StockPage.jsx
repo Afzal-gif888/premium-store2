@@ -4,8 +4,9 @@ import { fetchProducts, addProduct, updateProduct, deleteProduct } from 'store/s
 import Button from 'components/ui/Button';
 import Icon from 'components/AppIcon';
 import Image from 'components/AppImage';
-import { API_ENDPOINTS } from 'config/api';
-import axios from 'axios';
+// Cloudinary direct (unsigned) uploads from the client require an upload preset
+// Set the following env vars in your Netlify / local environment:
+// VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET
 
 const SIZES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
 
@@ -70,27 +71,32 @@ const StockPage = () => {
         console.log("Starting upload for file:", file.name); // Debug log
         setIsUploading(true);
         try {
-            const fd = new FormData();
-            // send single file as 'files' to keep server behavior
-            fd.append('files', file);
+            const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+            const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
-            const response = await axios.post(API_ENDPOINTS.UPLOAD, fd, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
-
-            if (response && response.data && Array.isArray(response.data.urls) && response.data.urls.length) {
-                const url = response.data.urls[0];
-                console.log("Upload successful:", url); // Debug log
-                setFormData(prev => ({ ...prev, images: [url], image: url }));
-            } else {
-                throw new Error('Unexpected upload response');
+            if (!cloudName || !uploadPreset) {
+                throw new Error('Cloudinary configuration missing. Set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET');
             }
+
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('upload_preset', uploadPreset);
+
+            const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+
+            const res = await fetch(url, { method: 'POST', body: fd });
+            if (!res.ok) throw new Error('Upload failed with status ' + res.status);
+            const json = await res.json();
+            const secure = json.secure_url || json.url;
+            if (!secure) throw new Error('Upload response did not include a URL');
+
+            console.log('Upload successful:', secure);
+            setFormData(prev => ({ ...prev, images: [secure], image: secure }));
         } catch (err) {
             console.error('Image upload failed:', err);
-            alert('Image upload failed: ' + (err.response?.data?.message || err.message || 'Server error'));
+            alert('Image upload failed: ' + (err.message || 'Server error'));
         } finally {
             setIsUploading(false);
-            // Clear input so same file can be selected again if needed (though form remount handles this too)
             if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };

@@ -1,15 +1,7 @@
 [build]
-  command = "npm install --prefix client && npm run build --prefix client && npm install --prefix server"
-  publish = "client/build"
-
-[functions]
-  directory = "server/functions"
-  node_bundler = "esbuild"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
-  status = 200
+  base = "client"
+  command = "npm run build"
+  publish = "dist"
 
 [[redirects]]
   from = "/*"

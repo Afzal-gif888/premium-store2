@@ -1,56 +1,70 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { API_ENDPOINTS } from 'config/api';
-
-const API_URL = API_ENDPOINTS.PRODUCTS;
+// Firestore (client SDK)
+import { db } from 'firebase';
+import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 export const fetchProducts = createAsyncThunk('stock/fetchProducts', async (_, { rejectWithValue }) => {
     try {
-        const response = await axios.get(`${API_URL}?t=${Date.now()}`);
-        return response.data;
+        const q = collection(db, 'products');
+        const snapshot = await getDocs(q);
+        const products = snapshot.docs.map(docSnap => {
+            const data = docSnap.data();
+            return {
+                ...data,
+                _id: docSnap.id,
+                id: docSnap.id,
+                createdAt: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate() : data.createdAt
+            };
+        });
+        return products;
     } catch (error) {
         console.error('Failed to fetch products:', error.message);
-        return rejectWithValue(error.response?.data || 'Failed to load products');
+        return rejectWithValue(error.message || 'Failed to load products');
     }
 });
 
 export const addProduct = createAsyncThunk('stock/addProduct', async (product, { rejectWithValue }) => {
     try {
-        const response = await axios.post(API_URL, product);
-        return response.data;
+        const payload = { ...product, createdAt: new Date() };
+        const docRef = await addDoc(collection(db, 'products'), payload);
+        return { ...payload, _id: docRef.id, id: docRef.id };
     } catch (error) {
         console.error('Failed to add product:', error.message);
-        return rejectWithValue(error.response?.data || 'Failed to add product');
+        return rejectWithValue(error.message || 'Failed to add product');
     }
 });
 
 export const updateProduct = createAsyncThunk('stock/updateProduct', async ({ id, data }, { rejectWithValue }) => {
     try {
-        const response = await axios.put(`${API_URL}/${id}`, data);
-        return response.data;
+        const docRef = doc(db, 'products', id);
+        await updateDoc(docRef, data);
+        // Return updated object (merge id)
+        return { ...data, _id: id, id };
     } catch (error) {
         console.error('Failed to update product:', error.message);
-        return rejectWithValue(error.response?.data || 'Failed to update product');
+        return rejectWithValue(error.message || 'Failed to update product');
     }
 });
 
 export const deleteProduct = createAsyncThunk('stock/deleteProduct', async (id, { rejectWithValue }) => {
     try {
-        await axios.delete(`${API_URL}/${id}`);
+        const docRef = doc(db, 'products', id);
+        await deleteDoc(docRef);
         return id;
     } catch (error) {
         console.error('Failed to delete product:', error.message);
-        return rejectWithValue(error.response?.data || 'Failed to delete product');
+        return rejectWithValue(error.message || 'Failed to delete product');
     }
 });
 
 export const toggleBestseller = createAsyncThunk('stock/toggleBestseller', async ({ id, isBestseller }, { rejectWithValue }) => {
     try {
-        const response = await axios.patch(`${API_URL}/${id}/bestseller`, { isBestseller });
-        return response.data;
+        const docRef = doc(db, 'products', id);
+        await updateDoc(docRef, { isBestseller });
+        return { _id: id, id, isBestseller };
     } catch (error) {
         console.error('Failed to toggle bestseller:', error.message);
-        return rejectWithValue(error.response?.data || 'Failed to toggle bestseller');
+        return rejectWithValue(error.message || 'Failed to toggle bestseller');
     }
 });
 

@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Sample Product 1",
+    "url": "https://via.placeholder.com/150",
+    "category": "Shoes",
+    "price": 49.99,
+    "sizes": { "2": 10, "3": 15, "4": 20 }
+  },
+  {
+    "name": "Sample Product 2",
+    "url": "https://via.placeholder.com/150",
+    "category": "Sandals",
+    "price": 29.99,
+    "sizes": { "5": 5, "6": 10, "7": 8 }
+  },
+  {
+    "name": "Sample Product 3",
+    "url": "https://via.placeholder.com/150",
+    "category": "Boots",
+    "price": 79.99,
+    "sizes": { "8": 12, "9": 10, "10": 5 }
+  }
+]

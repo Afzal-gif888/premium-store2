@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { fetchAnnouncements, addAnnouncement, deleteAnnouncement } from 'store/slices/announcementSlice';
 import Button from 'components/ui/Button';
 import Image from 'components/AppImage';
-import { API_ENDPOINTS } from 'config/api';
 
 const AnnouncementsPage = () => {
     const dispatch = useDispatch();

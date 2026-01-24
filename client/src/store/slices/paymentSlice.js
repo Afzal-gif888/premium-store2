@@ -1,24 +1,32 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { API_ENDPOINTS } from 'config/api';
+import { db } from 'firebase';
+import { collection, getDocs, addDoc, query, orderBy } from 'firebase/firestore';
 
-const API_URL = API_ENDPOINTS.PAYMENTS;
+const COLLECTION = 'payments';
 
 export const fetchPayments = createAsyncThunk('payments/fetchPayments', async (_, { rejectWithValue }) => {
     try {
-        const response = await axios.get(API_URL);
-        return response.data;
+        const q = query(collection(db, COLLECTION), orderBy('date', 'desc'));
+        const snapshot = await getDocs(q);
+        const payments = snapshot.docs.map(docSnap => ({
+            ...docSnap.data(),
+            _id: docSnap.id,
+            id: docSnap.id,
+            date: (docSnap.data().date && docSnap.data().date.toDate) ? docSnap.data().date.toDate() : docSnap.data().date
+        }));
+        return payments;
     } catch (error) {
-        return rejectWithValue(error.response?.data || 'Failed to fetch payments');
+        return rejectWithValue(error.message || 'Failed to fetch payments');
     }
 });
 
 export const addPayment = createAsyncThunk('payments/addPayment', async (paymentData, { rejectWithValue }) => {
     try {
-        const response = await axios.post(API_URL, paymentData);
-        return response.data;
+        const payload = { ...paymentData, date: new Date() };
+        const docRef = await addDoc(collection(db, COLLECTION), payload);
+        return { ...payload, _id: docRef.id, id: docRef.id };
     } catch (error) {
-        return rejectWithValue(error.response?.data || 'Failed to add payment');
+        return rejectWithValue(error.message || 'Failed to add payment');
     }
 });
 

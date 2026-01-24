@@ -1,36 +1,55 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { API_ENDPOINTS } from 'config/api';
+import { db } from 'firebase';
+import { collection, getDocs, addDoc, deleteDoc, writeBatch, query, orderBy, doc } from 'firebase/firestore';
 
-const API_URL = API_ENDPOINTS.ANNOUNCEMENTS;
+const COLLECTION = 'announcements';
 
 export const fetchAnnouncements = createAsyncThunk('announcements/fetchAnnouncements', async (_, { rejectWithValue }) => {
     try {
-        const response = await axios.get(`${API_URL}?t=${Date.now()}`);
-        return response.data;
+        const q = query(collection(db, COLLECTION), orderBy('createdAt', 'desc'));
+        const snapshot = await getDocs(q);
+        const items = snapshot.docs.map(docSnap => {
+            const data = docSnap.data();
+            return {
+                ...data,
+                _id: docSnap.id,
+                id: docSnap.id,
+                createdAt: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate() : data.createdAt
+            };
+        });
+        return items;
     } catch (error) {
         console.error('Failed to fetch announcements:', error.message);
-        return rejectWithValue(error.response?.data || 'Failed to load announcements');
+        return rejectWithValue(error.message || 'Failed to load announcements');
     }
 });
 
 export const addAnnouncement = createAsyncThunk('announcements/addAnnouncement', async (announcement, { rejectWithValue }) => {
     try {
-        const response = await axios.post(API_URL, announcement);
-        return response.data;
+        // Clear existing announcements first (to mimic server behaviour)
+        const snapshot = await getDocs(collection(db, COLLECTION));
+        if (!snapshot.empty) {
+            const batch = writeBatch(db);
+            snapshot.docs.forEach(d => batch.delete(d.ref));
+            await batch.commit();
+        }
+
+        const payload = { ...announcement, createdAt: new Date(), active: true };
+        const docRef = await addDoc(collection(db, COLLECTION), payload);
+        return { ...payload, _id: docRef.id, id: docRef.id };
     } catch (error) {
         console.error('Failed to add announcement:', error.message);
-        return rejectWithValue(error.response?.data || 'Failed to add announcement');
+        return rejectWithValue(error.message || 'Failed to add announcement');
     }
 });
 
 export const deleteAnnouncement = createAsyncThunk('announcements/deleteAnnouncement', async (id, { rejectWithValue }) => {
     try {
-        await axios.delete(`${API_URL}/${id}`);
+        await deleteDoc(doc(db, COLLECTION, id));
         return id;
     } catch (error) {
         console.error('Failed to delete announcement:', error.message);
-        return rejectWithValue(error.response?.data || 'Failed to delete announcement');
+        return rejectWithValue(error.message || 'Failed to delete announcement');
     }
 });
 
