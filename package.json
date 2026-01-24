@@ -1,0 +1,28 @@
+{
+  "name": "final-premium",
+  "version": "1.0.0",
+  "description": "Premium Store Application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "build": "cd client && npm run build",
+    "test": "jest"
+  },
+  "dependencies": {
+    "apicache": "^1.6.3",
+    "autoprefixer": "^10.4.23",
+    "compression": "^1.8.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "firebase-admin": "^13.6.0",
+    "multer": "^2.0.2",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  },
+  "author": "Afzal",
+  "license": "ISC"
+}

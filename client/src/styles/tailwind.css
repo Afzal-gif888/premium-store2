@@ -1,0 +1,387 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Brand Colors */
+    --color-primary: #1a1a1a;
+    /* gray-900 - Confident brand presence */
+    --color-primary-foreground: #ffffff;
+    /* white - High contrast for accessibility */
+    --color-secondary: #4a4a4a;
+    /* gray-600 - Supporting content hierarchy */
+    --color-secondary-foreground: #ffffff;
+    /* white - Clear readability */
+    --color-accent: #c9a96e;
+    /* gold - Premium moments */
+    --color-accent-foreground: #1a1a1a;
+    /* gray-900 - Strong contrast */
+
+    /* Background & Surface */
+    --color-background: #fafafa;
+    /* gray-50 - Clean product showcase */
+    --color-foreground: #2d2d2d;
+    /* gray-800 - Primary text */
+    --color-card: #ffffff;
+    /* white - Elevated containers */
+    --color-card-foreground: #2d2d2d;
+    /* gray-800 - Card text */
+    --color-popover: #ffffff;
+    /* white - Overlay surfaces */
+    --color-popover-foreground: #2d2d2d;
+    /* gray-800 - Popover text */
+
+    /* Muted & Subtle */
+    --color-muted: #f7fafc;
+    /* gray-100 - Subtle backgrounds */
+    --color-muted-foreground: #6b6b6b;
+    /* gray-500 - Secondary text */
+
+    /* Interactive States */
+    --color-border: #e5e7eb;
+    /* gray-200 - Subtle separation */
+    --color-input: #ffffff;
+    /* white - Form backgrounds */
+    --color-ring: #c9a96e;
+    /* gold - Focus indicators */
+
+    /* Semantic Colors */
+    --color-success: #2d5a27;
+    /* green-800 - Stock availability */
+    --color-success-foreground: #ffffff;
+    /* white - Success text */
+    --color-warning: #8b5a00;
+    /* amber-800 - Low inventory */
+    --color-warning-foreground: #ffffff;
+    /* white - Warning text */
+    --color-error: #8b2635;
+    /* red-800 - Out of stock */
+    --color-error-foreground: #ffffff;
+    /* white - Error text */
+    --color-destructive: #8b2635;
+    /* red-800 - Destructive actions */
+    --color-destructive-foreground: #ffffff;
+    /* white - Destructive text */
+
+    /* Typography */
+    --font-headline: 'Crimson Pro', serif;
+    --font-body: 'Source Sans 3', sans-serif;
+    --font-cta: 'DM Sans', sans-serif;
+
+    /* Spacing & Layout */
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --color-background: #0f0f0f;
+    /* gray-950 - Dark canvas */
+    --color-foreground: #fafafa;
+    /* gray-50 - Light text */
+    --color-card: #1a1a1a;
+    /* gray-900 - Dark cards */
+    --color-card-foreground: #fafafa;
+    /* gray-50 - Card text */
+    --color-popover: #1a1a1a;
+    /* gray-900 - Dark overlays */
+    --color-popover-foreground: #fafafa;
+    /* gray-50 - Popover text */
+    --color-primary: #c9a96e;
+    /* gold - Dark mode accent */
+    --color-primary-foreground: #1a1a1a;
+    /* gray-900 - Dark contrast */
+    --color-secondary: #4a4a4a;
+    /* gray-600 - Dark secondary */
+    --color-secondary-foreground: #fafafa;
+    /* gray-50 - Secondary text */
+    --color-muted: #262626;
+    /* gray-800 - Dark muted */
+    --color-muted-foreground: #a3a3a3;
+    /* gray-400 - Muted text */
+    --color-accent: #c9a96e;
+    /* gold - Dark accent */
+    --color-accent-foreground: #1a1a1a;
+    /* gray-900 - Accent text */
+    --color-border: #404040;
+    /* gray-700 - Dark borders */
+    --color-input: #262626;
+    /* gray-800 - Dark inputs */
+    --color-ring: #c9a96e;
+    /* gold - Dark focus */
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-headline);
+  }
+}
+
+@layer components {
+
+  /* Header Styles */
+  .header {
+    @apply sticky top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-md shadow-sm;
+  }
+
+  .header-container {
+    @apply flex items-center justify-between h-14 md:h-16 px-4 md:px-6 max-w-7xl mx-auto;
+  }
+
+  .header-logo {
+    @apply flex items-center gap-3;
+  }
+
+  .header-logo-icon {
+    @apply w-10 h-10 rounded-lg flex items-center justify-center;
+  }
+
+  .header-logo-text {
+    @apply text-xl font-semibold text-primary;
+    font-family: var(--font-headline);
+  }
+
+  .header-nav {
+    @apply hidden lg:flex items-center gap-8;
+  }
+
+  .header-nav-link {
+    @apply text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-300 relative py-1 hover:scale-105 active:scale-95;
+    font-family: var(--font-body);
+  }
+
+  .header-nav-link::after {
+    @apply content-[''] absolute bottom-0 left-0 w-0 h-0.5 bg-accent transition-all duration-300 ease-out;
+  }
+
+  .header-nav-link:hover::after {
+    @apply w-full;
+  }
+
+  .mobile-menu-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-foreground hover:bg-muted transition-all duration-300 active:scale-95;
+  }
+
+  .mobile-menu-link.active {
+    @apply bg-primary text-primary-foreground shadow-lg;
+  }
+
+  .admin-btn {
+    @apply px-5 py-2 bg-primary text-primary-foreground rounded-full font-bold text-sm transition-all duration-500 hover:shadow-xl hover:-translate-y-0.5 active:scale-95 border border-amber-600/20 relative overflow-hidden;
+  }
+
+  .admin-btn::before {
+    @apply content-[''] absolute top-0 -left-[100%] w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-[-25deg] transition-all duration-1000 ease-in-out;
+  }
+
+  .admin-btn:hover::before {
+    @apply left-[100%];
+  }
+
+  .mobile-menu-link-text {
+    @apply text-base font-medium;
+    font-family: var(--font-body);
+  }
+
+  /* Main Content Styles */
+  .main-content {
+    @apply min-h-screen;
+  }
+
+  /* Availability Badge Styles */
+  .availability-badge {
+    @apply absolute top-4 right-4 px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-sm;
+    font-family: var(--font-cta);
+    animation: pulse-subtle 2s ease-in-out infinite;
+  }
+
+  .availability-badge.in-stock {
+    @apply text-success-foreground;
+  }
+
+  .availability-badge.low-stock {
+    @apply text-warning-foreground;
+  }
+
+  .availability-badge.out-of-stock {
+    @apply text-error-foreground;
+  }
+
+  @keyframes pulse-subtle {
+
+    0%,
+    100% {
+      transform: scale(1);
+    }
+
+    50% {
+      transform: scale(1.05);
+    }
+  }
+
+  /* Product Card Styles */
+  .product-card {
+    @apply relative bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300;
+  }
+
+  .product-card:hover {
+    @apply transform -translate-y-2;
+  }
+
+  .product-card-image {
+    @apply w-full aspect-square object-cover;
+  }
+
+  .product-card-content {
+    @apply p-4;
+  }
+
+  .product-card-title {
+    @apply text-lg font-semibold text-foreground mb-2;
+    font-family: var(--font-headline);
+  }
+
+  .product-card-price {
+    @apply text-xl font-bold text-primary;
+    font-family: var(--font-cta);
+  }
+
+  /* CTA Button Styles */
+  .cta-button {
+    @apply px-6 py-3 rounded-lg font-bold text-sm transition-all duration-200;
+    font-family: var(--font-cta);
+  }
+
+  .cta-button:hover {
+    @apply transform -translate-y-0.5 shadow-lg;
+  }
+
+  .cta-button-primary {
+    @apply bg-accent text-accent-foreground;
+  }
+
+  .cta-button-secondary {
+    @apply bg-secondary text-secondary-foreground;
+  }
+
+  /* Gradient Mesh Background */
+  .gradient-mesh {
+    @apply absolute inset-0 opacity-5;
+    background: conic-gradient(from 45deg,
+        var(--color-primary),
+        var(--color-secondary),
+        var(--color-muted));
+    animation: rotate-mesh 20s linear infinite;
+  }
+
+  @keyframes rotate-mesh {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(0.5deg);
+    }
+  }
+
+  /* Asymmetric Grid */
+  .asymmetric-grid {
+    @apply grid gap-6;
+    grid-template-columns: 1.618fr 1fr;
+  }
+
+  @media (max-width: 768px) {
+    .asymmetric-grid {
+      @apply grid-cols-1;
+    }
+  }
+
+  /* Scroll Reveal Animation */
+  .scroll-reveal {
+    @apply opacity-0 transform translate-y-4 transition-all duration-700;
+  }
+
+  .scroll-reveal.revealed {
+    @apply opacity-100 translate-y-0;
+  }
+
+  /* Performance & Mobile UX Optimizations */
+  section {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 500px;
+  }
+
+  #announcements {
+    content-visibility: visible; /* Hero section should always be visible */
+  }
+
+  .mobile-menu-overlay {
+    overscroll-behavior: contain;
+  }
+
+  /* Enhanced touch targets for small screens */
+  @media (max-width: 640px) {
+    button, a {
+      min-height: 44px;
+      min-width: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cta-button {
+      @apply py-4; /* Larger target for mobile hero buttons */
+    }
+  }
+
+  /* Skeleton Loading */
+  .skeleton {
+    @apply bg-muted rounded animate-pulse;
+  }
+
+  .skeleton-shimmer {
+    @apply relative overflow-hidden;
+  }
+
+  .skeleton-shimmer::after {
+    @apply absolute inset-0;
+    content: '';
+    background: linear-gradient(90deg,
+        transparent 25%,
+        rgba(255, 255, 255, 0.2) 50%,
+        transparent 75%);
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Lazy loading for images */
+  img {
+    display: block;
+  }
+
+  /* Cloudinary optimized formats */
+  img[src*="cloudinary"] {
+    object-fit: cover;
+  }
+}
