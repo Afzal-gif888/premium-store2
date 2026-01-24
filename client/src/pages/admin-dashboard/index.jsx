@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from 'components/Header';
 import Icon from 'components/AppIcon';
@@ -6,7 +6,8 @@ import MetricCard from './components/MetricCard';
 import QuickActionButton from './components/QuickActionButton';
 import ActivityItem from './components/ActivityItem';
 import InventoryAlertCard from './components/InventoryAlertCard';
-import SalesChart from './components/SalesChart';
+// Lazy-load the heavy chart component to avoid shipping `recharts` in the initial bundle
+const SalesChart = lazy(() => import('./components/SalesChart'));
 import NotificationBanner from './components/NotificationBanner';
 
 const AdminDashboard = () => {
@@ -305,8 +306,14 @@ const AdminDashboard = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
             <div className="lg:col-span-2">
-              <SalesChart data={mockSalesData} title="Weekly Sales Overview" />
-            </div>
+                <Suspense fallback={
+                  <div className="bg-card rounded-lg p-6 shadow-sm h-64 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full border-b-2 border-black animate-spin" />
+                  </div>
+                }>
+                  <SalesChart data={mockSalesData} title="Weekly Sales Overview" />
+                </Suspense>
+              </div>
 
             <div className="bg-card rounded-lg p-4 md:p-6 shadow-sm">
               <h3 className="text-base md:text-lg font-semibold text-foreground mb-4">Quick Actions</h3>
