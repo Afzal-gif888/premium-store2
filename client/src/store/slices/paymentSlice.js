@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { db } from 'firebase';
+import { db } from '../../firebase';
 import { collection, getDocs, addDoc, query, orderBy } from 'firebase/firestore';
 
 const COLLECTION = 'payments';
@@ -8,12 +8,21 @@ export const fetchPayments = createAsyncThunk('payments/fetchPayments', async (_
     try {
         const q = query(collection(db, COLLECTION), orderBy('date', 'desc'));
         const snapshot = await getDocs(q);
-        const payments = snapshot.docs.map(docSnap => ({
-            ...docSnap.data(),
-            _id: docSnap.id,
-            id: docSnap.id,
-            date: (docSnap.data().date && docSnap.data().date.toDate) ? docSnap.data().date.toDate() : docSnap.data().date
-        }));
+        const payments = snapshot.docs.map(docSnap => {
+            const data = docSnap.data();
+            let date = data.date;
+            if (date && typeof date.toMillis === 'function') {
+                date = date.toMillis();
+            } else if (date instanceof Date) {
+                date = date.getTime();
+            }
+            return {
+                ...data,
+                _id: docSnap.id,
+                id: docSnap.id,
+                date
+            };
+        });
         return payments;
     } catch (error) {
         return rejectWithValue(error.message || 'Failed to fetch payments');
@@ -22,7 +31,8 @@ export const fetchPayments = createAsyncThunk('payments/fetchPayments', async (_
 
 export const addPayment = createAsyncThunk('payments/addPayment', async (paymentData, { rejectWithValue }) => {
     try {
-        const payload = { ...paymentData, date: new Date() };
+    const now = Date.now();
+    const payload = { ...paymentData, date: now };
         const docRef = await addDoc(collection(db, COLLECTION), payload);
         return { ...payload, _id: docRef.id, id: docRef.id };
     } catch (error) {

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { db } from 'firebase';
+import { db } from '../../firebase';
 import { collection, getDocs, addDoc, deleteDoc, writeBatch, query, orderBy, doc } from 'firebase/firestore';
 
 const COLLECTION = 'announcements';
@@ -10,11 +10,17 @@ export const fetchAnnouncements = createAsyncThunk('announcements/fetchAnnouncem
         const snapshot = await getDocs(q);
         const items = snapshot.docs.map(docSnap => {
             const data = docSnap.data();
+            let createdAt = data.createdAt;
+            if (createdAt && typeof createdAt.toMillis === 'function') {
+                createdAt = createdAt.toMillis();
+            } else if (createdAt instanceof Date) {
+                createdAt = createdAt.getTime();
+            }
             return {
                 ...data,
                 _id: docSnap.id,
                 id: docSnap.id,
-                createdAt: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate() : data.createdAt
+                createdAt
             };
         });
         return items;
@@ -34,7 +40,9 @@ export const addAnnouncement = createAsyncThunk('announcements/addAnnouncement',
             await batch.commit();
         }
 
-        const payload = { ...announcement, createdAt: new Date(), active: true };
+    // Use a serializable timestamp (ms)
+    const now = Date.now();
+    const payload = { ...announcement, createdAt: now, active: true };
         const docRef = await addDoc(collection(db, COLLECTION), payload);
         return { ...payload, _id: docRef.id, id: docRef.id };
     } catch (error) {

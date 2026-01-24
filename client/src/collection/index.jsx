@@ -67,10 +67,12 @@ const Collection = () => {
     let filtered = [...products];
 
     if (searchTerm?.trim()) {
-      filtered = filtered?.filter((product) =>
-        product?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-        product?.category?.toLowerCase()?.includes(searchTerm?.toLowerCase())
-      );
+      const q = String(searchTerm || '').toLowerCase();
+      filtered = filtered?.filter((product) => {
+        const name = product && product.name ? String(product.name).toLowerCase() : '';
+        const category = product && product.category ? String(product.category).toLowerCase() : '';
+        return name.includes(q) || category.includes(q);
+      });
     }
 
     // Category filter removed

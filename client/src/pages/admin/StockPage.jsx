@@ -232,10 +232,19 @@ const StockPage = () => {
         }
     };
 
-    const filteredProducts = products.filter(p =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Defensive filtering: guard against missing fields in schema-less Firestore docs
+    const filteredProducts = products.filter(p => {
+        const name = (p && p.name) ? String(p.name) : '';
+        const brand = (p && p.brand) ? String(p.brand) : '';
+        const category = (p && p.category) ? String(p.category) : '';
+        const query = String(searchTerm || '').toLowerCase();
+
+        return (
+            name.toLowerCase().includes(query) ||
+            brand.toLowerCase().includes(query) ||
+            category.toLowerCase().includes(query)
+        );
+    });
 
     const stockSummary = {
         total: products.length,

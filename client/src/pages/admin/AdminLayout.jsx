@@ -1,17 +1,20 @@
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { logout } from 'store/slices/authSlice';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../firebase';
 import Button from 'components/ui/Button';
 import { getImageUrl } from 'config/api';
 import Icon from 'components/AppIcon';
 
 const AdminLayout = () => {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
-    const handleLogout = () => {
-        dispatch(logout());
-        navigate('/admin');
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+        } catch (err) {
+            console.warn('Sign out failed', err);
+        }
+        navigate('/login');
     };
 
     const navItems = [

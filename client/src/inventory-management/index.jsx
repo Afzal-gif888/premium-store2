@@ -178,10 +178,12 @@ const InventoryManagement = () => {
 
     // Search filter
     if (searchQuery) {
-      filtered = filtered?.filter((p) =>
-      p?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
-      p?.sku?.toLowerCase()?.includes(searchQuery?.toLowerCase())
-      );
+      const q = String(searchQuery || '').toLowerCase();
+      filtered = filtered?.filter((p) => {
+        const name = p && p.name ? String(p.name).toLowerCase() : '';
+        const sku = p && p.sku ? String(p.sku).toLowerCase() : '';
+        return name.includes(q) || sku.includes(q);
+      });
     }
 
     // Category filter

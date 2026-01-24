@@ -36,26 +36,31 @@ const BestsellersPage = () => {
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {products.map(product => (
-                            <tr key={product._id || product.id}>
+                        {products.map(product => {
+                            const safeName = product && product.name ? String(product.name) : '';
+                            const safePrice = Number(product && product.price ? product.price : 0);
+                            const safeImage = product && product.image ? product.image : '';
+                            const safeId = product && (product._id || product.id) ? (product._id || product.id) : undefined;
+                            return (
+                            <tr key={safeId || Math.random()}>
                                 <td className="px-6 py-4 whitespace-nowrap flex items-center gap-3">
-                                    {product.image && (
-                                        <Image src={product.image} alt="" className="h-10 w-10 rounded object-cover" />
+                                    {safeImage && (
+                                        <Image src={safeImage} alt="" className="h-10 w-10 rounded object-cover" />
                                     )}
-                                    <span className="font-medium">{product.name}</span>
+                                    <span className="font-medium">{safeName}</span>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{Number(product.price || 0).toLocaleString('en-IN')}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{safePrice.toLocaleString('en-IN')}</td>
                                 <td className="px-6 py-6 whitespace-nowrap text-center">
                                     <button
                                         onClick={() => {
-                                            const originalStatus = product.isBestseller;
-                                            dispatch(toggleBestseller({ id: product._id || product.id, isBestseller: !originalStatus }))
+                                            const originalStatus = !!product.isBestseller;
+                                            dispatch(toggleBestseller({ id: safeId, isBestseller: !originalStatus }))
                                                 .unwrap()
                                                 .then(() => {
-                                                    console.log(`Successfully updated bestseller status for ${product.name}`);
+                                                    console.log(`Successfully updated bestseller status for ${safeName}`);
                                                 })
                                                 .catch((err) => {
-                                                    alert(`Failed to update ${product.name}: ${err}`);
+                                                    alert(`Failed to update ${safeName || safeId}: ${err}`);
                                                 });
                                         }}
                                         className={`relative inline-flex h-8 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${product.isBestseller ? 'bg-indigo-600' : 'bg-gray-200'}`}
@@ -68,7 +73,8 @@ const BestsellersPage = () => {
                                     </button>
                                 </td>
                             </tr>
-                        ))}
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>

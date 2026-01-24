@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Routes as RouterRoutes, Route, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import AdminRoute from "./routes/AdminRoute";
 import ScrollToTop from "components/ScrollToTop";
 import ErrorBoundary from "components/ErrorBoundary";
 // import NotFound from "pages/NotFound"; // Lazy load this too
@@ -12,20 +13,15 @@ const NotFound = lazy(() => import("pages/NotFound"));
 
 // Admin Pages
 const LoginPage = lazy(() => import("pages/admin/LoginPage"));
+const SignupPage = lazy(() => import("pages/admin/SignupPage"));
 const AdminLayout = lazy(() => import("pages/admin/AdminLayout"));
 const StockPage = lazy(() => import("pages/admin/StockPage"));
 const AnnouncementsPage = lazy(() => import("pages/admin/AnnouncementsPage"));
 const BestsellersPage = lazy(() => import("pages/admin/BestsellersPage"));
 const PaymentsPage = lazy(() => import("pages/admin/PaymentsPage"));
 
-const ProtectedRoute = ({ children }) => {
-  const authState = useSelector((state) => state.auth) || { isAuthenticated: false };
-  const { isAuthenticated } = authState;
-  if (!isAuthenticated) {
-    return <Navigate to="/admin" replace />;
-  }
-  return children;
-};
+// Note: admin auth is handled via Firebase Auth and AuthContext.
+// We use AdminRoute (which waits for authReady) to protect admin pages.
 
 const Routes = () => {
   return (
@@ -43,9 +39,11 @@ const Routes = () => {
             <Route path="/product/:id" element={<ProductDetails />} />
 
             {/* Admin Routes */}
-            <Route path="/admin" element={<LoginPage />} />
+            <Route path="/admin" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/admin/signup" element={<SignupPage />} />
 
-            <Route element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+            <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
               <Route path="/admin/stock" element={<StockPage />} />
               <Route path="/admin/announcements" element={<AnnouncementsPage />} />
               <Route path="/admin/bestsellers" element={<BestsellersPage />} />

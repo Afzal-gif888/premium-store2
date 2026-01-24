@@ -1,20 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 // Firestore (client SDK)
-import { db } from 'firebase';
+import { db } from '../../firebase';
 import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { normalizeProductData } from '../../data/firestoreMapping';
 
 export const fetchProducts = createAsyncThunk('stock/fetchProducts', async (_, { rejectWithValue }) => {
     try {
         const q = collection(db, 'products');
         const snapshot = await getDocs(q);
         const products = snapshot.docs.map(docSnap => {
-            const data = docSnap.data();
-            return {
-                ...data,
-                _id: docSnap.id,
-                id: docSnap.id,
-                createdAt: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate() : data.createdAt
-            };
+            const data = docSnap.data() || {};
+            return normalizeProductData(data, docSnap.id);
         });
         return products;
     } catch (error) {
@@ -25,9 +21,12 @@ export const fetchProducts = createAsyncThunk('stock/fetchProducts', async (_, {
 
 export const addProduct = createAsyncThunk('stock/addProduct', async (product, { rejectWithValue }) => {
     try {
-        const payload = { ...product, createdAt: new Date() };
-        const docRef = await addDoc(collection(db, 'products'), payload);
-        return { ...payload, _id: docRef.id, id: docRef.id };
+        // Store serializable timestamp (milliseconds) for createdAt
+    const now = Date.now();
+    const payload = { ...product, createdAt: now };
+    const docRef = await addDoc(collection(db, 'products'), payload);
+    // Return normalized product for consistency in the store
+    return normalizeProductData(payload, docRef.id);
     } catch (error) {
         console.error('Failed to add product:', error.message);
         return rejectWithValue(error.message || 'Failed to add product');
@@ -147,7 +146,10 @@ const stockSlice = createSlice({
                 const updated = action.payload;
                 const index = state.products.findIndex(p => (p._id || p.id) === (updated._id || updated.id));
                 if (index !== -1) {
-                    state.products[index] = updated;
+                    // Merge the changed fields into the existing product to avoid
+                    // accidentally overwriting other fields when the server only
+                    // returns a partial payload (e.g., only { isBestseller }).
+                    state.products[index] = { ...state.products[index], ...updated };
                 }
             })
             .addCase(toggleBestseller.rejected, (state, action) => {

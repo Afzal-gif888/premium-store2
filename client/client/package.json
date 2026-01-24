@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "premium-store": "file:.."
+  }
+}

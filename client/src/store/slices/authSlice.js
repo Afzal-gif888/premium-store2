@@ -1,48 +1,14 @@
-import { createSlice } from '@reduxjs/toolkit';
-
-// Safe localStorage access (prevents SSR crashes)
-const getStorageItem = (key) => {
-    try {
-        if (typeof window !== 'undefined' && window.localStorage) {
-            return localStorage.getItem(key);
-        }
-    } catch (e) {
-        console.warn('localStorage not available');
-    }
-    return null;
-};
+// Legacy authSlice retained for reference but no longer used.
+// The application now uses Firebase Auth (AuthContext) as the single source
+// of truth for authentication. Remove this file once you're confident there
+// are no remaining imports.
 
 const initialState = {
-    isAuthenticated: getStorageItem('isAdminAuthenticated') === 'true',
-    user: getStorageItem('adminUser') || null,
+  isAuthenticated: false,
+  user: null,
 };
 
-const authSlice = createSlice({
-    name: 'auth',
-    initialState,
-    reducers: {
-        login: (state, action) => {
-            const { username, password } = action.payload;
-            // STRICT CREDENTIAL CHECK
-            if (username === 'chandpeera786@gmail.com' && password === 'peera143@') {
-                state.isAuthenticated = true;
-                state.user = username;
-                localStorage.setItem('isAdminAuthenticated', 'true');
-                localStorage.setItem('adminUser', username);
-            } else {
-                // We can throw an error or handle it in the UI component by checking state
-                state.isAuthenticated = false;
-                state.user = null;
-            }
-        },
-        logout: (state) => {
-            state.isAuthenticated = false;
-            state.user = null;
-            localStorage.removeItem('isAdminAuthenticated');
-            localStorage.removeItem('adminUser');
-        },
-    },
-});
-
-export const { login, logout } = authSlice.actions;
-export default authSlice.reducer;
+export default function authReducer(state = initialState, action) {
+  // No-op reducer to avoid runtime errors if accidentally imported.
+  return state;
+}

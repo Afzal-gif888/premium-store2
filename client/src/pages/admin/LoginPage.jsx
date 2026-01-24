@@ -1,35 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { login } from 'store/slices/authSlice';
 import Button from 'components/ui/Button';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../firebase';
+import { useAuth } from '../../context/AuthContext';
 
 const LoginPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
-    const authState = useSelector(state => state.auth) || { isAuthenticated: false };
-    const { isAuthenticated } = authState;
+    const { user, authReady } = useAuth();
 
     useEffect(() => {
-        if (isAuthenticated) {
-            navigate('/admin/stock'); // Default to stock page
+        // Once auth is ready and we have a user, redirect to admin stock
+        if (authReady && user) {
+            navigate('/admin/stock');
         }
-    }, [isAuthenticated, navigate]);
+    }, [authReady, user, navigate]);
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        // Dispatch login action
-        // logic inside slice handles validation, but we can also check here if we want immediate feedback
-        // but the slice is the 'backend' logic.
+        setError('');
 
-        if (username === 'chandpeera786@gmail.com' && password === 'peera143@') {
-            dispatch(login({ username, password }));
-        } else {
-            setError('Invalid credentials');
+        const email = username && username.trim();
+        const pwd = password && password.trim();
+
+        if (!email || !pwd) {
+            setError('Please enter email and password.');
+            return;
+        }
+
+        try {
+            await signInWithEmailAndPassword(auth, email, pwd);
+            // onAuthStateChanged in AuthContext will redirect when ready
+        } catch (err) {
+            console.error('Login failed', err);
+            // Map common Firebase errors to user-friendly messages
+            const code = err && err.code ? err.code : '';
+            if (code === 'auth/wrong-password' || code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
+                setError('Invalid email or password.');
+            } else if (code === 'auth/too-many-requests') {
+                setError('Too many failed attempts. Try again later.');
+            } else if (code === 'auth/invalid-email') {
+                setError('Please enter a valid email address.');
+            } else {
+                setError(err.message || 'Login failed.');
+            }
         }
     };
 

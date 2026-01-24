@@ -34,10 +34,12 @@ const Select = React.forwardRef(({
 
     // Filter options based on search
     const filteredOptions = searchable && searchTerm
-        ? options?.filter(option =>
-            option?.label?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-            (option?.value && option?.value?.toString()?.toLowerCase()?.includes(searchTerm?.toLowerCase()))
-        )
+        ? options?.filter(option => {
+            const q = String(searchTerm || '').toLowerCase();
+            const label = option && option.label ? String(option.label).toLowerCase() : '';
+            const valueStr = option && option.value ? String(option.value).toLowerCase() : '';
+            return label.includes(q) || valueStr.includes(q);
+        })
         : options;
 
     // Get selected option(s) for display

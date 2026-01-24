@@ -10,9 +10,11 @@ const SearchBar = ({ onSearch, suggestions = [] }) => {
 
   useEffect(() => {
     if (searchTerm?.trim()?.length > 0) {
-      const filtered = suggestions?.filter(suggestion =>
-        suggestion?.toLowerCase()?.includes(searchTerm?.toLowerCase())
-      );
+      const q = String(searchTerm || '').toLowerCase();
+      const filtered = suggestions?.filter(suggestion => {
+        const s = suggestion ? String(suggestion).toLowerCase() : '';
+        return s.includes(q);
+      });
       setFilteredSuggestions(filtered);
       setShowSuggestions(filtered?.length > 0);
     } else {
